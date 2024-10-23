@@ -15,6 +15,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.KeyEvent
+import android.view.View
 import android.webkit.CookieManager
 import android.webkit.URLUtil
 import android.webkit.WebResourceError
@@ -28,11 +29,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.coding.meet.webviewtoapp.databinding.ActivityMainBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
-    private var webUrl = "https://github.com/SauravKumar1s/"
+
+    private var webUrl = "https://web-view-sable.vercel.app/"
     private val multiplePermissionId = 14
     private val multiplePermissionNameList = if (Build.VERSION.SDK_INT >= 33) {
         arrayListOf()
@@ -61,6 +64,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Loading dialog setup
         loadingDialog.setContentView(R.layout.loading_layout)
         loadingDialog.window!!.setLayout(
             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -74,8 +78,9 @@ class MainActivity : AppCompatActivity() {
         setting.allowFileAccess = true
         setting.domStorageEnabled = true
         setting.javaScriptCanOpenWindowsAutomatically = true
-        setting.supportMultipleWindows()
+        setting.setSupportMultipleWindows(true)
 
+        // Snackbar for no internet connection
         val snackbar = Snackbar.make(
             mainBinding.root,
             "No Internet Connection",
@@ -84,12 +89,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
         }
 
+        // Network connectivity observer
         networkConnectivityObserver.observe(this) {
             when (it) {
                 Status.Available -> {
-                    if (snackbar.isShown) {
-                        snackbar.dismiss()
-                    }
+                    if (snackbar.isShown) snackbar.dismiss()
                     mainBinding.swipeRefresh.isEnabled = true
                     if (!isLoaded) loadWebView()
                 }
@@ -101,12 +105,45 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Swipe to refresh listener
         mainBinding.swipeRefresh.setOnRefreshListener {
             if (!isLoaded) {
                 loadWebView()
             } else {
                 setProgressDialogVisibility(false)
             }
+        }
+
+        // Bottom navigation setup
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNavigationView.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.home -> {
+                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/")
+                    true
+                }
+                R.id.favorites -> {
+                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/favorites.html")
+                    true
+                }
+                R.id.about -> {
+                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/about.html")
+                    true
+                }
+                R.id.privacy_policy -> {
+                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/privacy_policy.html")
+                    true
+                }
+                R.id.feedback -> {
+                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/feedback.html")
+                    true
+                }
+                else -> false
+            }
+        }
+
+        if (!isLoaded) {
+            bottomNavigationView.selectedItemId = R.id.home
         }
     }
 
@@ -122,15 +159,16 @@ class MainActivity : AppCompatActivity() {
     private fun showNoInternet() {
         isLoaded = false
         setProgressDialogVisibility(false)
-        mainBinding.webView.visibility = android.view.View.GONE
-        mainBinding.noInternet.noInternetRL.visibility = android.view.View.VISIBLE
+        mainBinding.webView.visibility = View.GONE
+        mainBinding.noInternet.noInternetRL.visibility = View.VISIBLE
     }
 
     private fun loadWebView() {
-        mainBinding.noInternet.noInternetRL.visibility = android.view.View.GONE
-        mainBinding.webView.visibility = android.view.View.VISIBLE
+        mainBinding.noInternet.noInternetRL.visibility = View.GONE
+        mainBinding.webView.visibility = View.VISIBLE
         mainBinding.webView.loadUrl(webUrl)
         mainBinding.webView.setDownloadListener { url, userAgent, contentDisposition, mimeType, contentLength ->
+            Log.d("Url", url.trim())
             if (checkMultiplePermission()) {
                 download(url.trim(), userAgent, contentDisposition, mimeType, contentLength)
             }
@@ -141,11 +179,8 @@ class MainActivity : AppCompatActivity() {
                 super.onPageStarted(view, url, favicon)
             }
 
-            override fun shouldOverrideUrlLoading(
-                view: WebView?, request: WebResourceRequest?
-            ): Boolean {
-                val url = request?.url.toString()
-                view?.loadUrl(url)
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                view?.loadUrl(request?.url.toString())
                 return super.shouldOverrideUrlLoading(view, request)
             }
 
@@ -156,9 +191,7 @@ class MainActivity : AppCompatActivity() {
                 super.onPageFinished(view, url)
             }
 
-            override fun onReceivedError(
-                view: WebView?, request: WebResourceRequest?, error: WebResourceError?
-            ) {
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                 isLoaded = false
                 setProgressDialogVisibility(false)
                 super.onReceivedError(view, request, error)
@@ -186,35 +219,36 @@ class MainActivity : AppCompatActivity() {
         } else {
             doubleBackToExitPressedOnce = true
             Toast.makeText(this, "Please click back again to exit", Toast.LENGTH_LONG).show()
-            Handler(Looper.getMainLooper()).postDelayed({
-                doubleBackToExitPressedOnce = false
-            }, 2000)
+            Handler(Looper.getMainLooper()).postDelayed(
+                { doubleBackToExitPressedOnce = false }, 2000
+            )
         }
     }
 
     private fun download(
-        url: String, userAgent: String, contentDisposition: String, mimeType: String, contentLength: Long
+        url: String,
+        userAgent: String,
+        contentDisposition: String,
+        mimeType: String,
+        contentLength: Long
     ) {
         val folder = File(Environment.getExternalStorageDirectory().toString() + "/Download/Image")
         if (!folder.exists()) {
             folder.mkdirs()
         }
-        Toast.makeText(this, "Download Started", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Download started", Toast.LENGTH_SHORT).show()
 
         val request = DownloadManager.Request(Uri.parse(url))
         request.setMimeType(mimeType)
         val cookie = CookieManager.getInstance().getCookie(url)
         request.addRequestHeader("cookie", cookie)
         request.addRequestHeader("User-Agent", userAgent)
-        request.setAllowedNetworkTypes(
-            DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE
-        )
+        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         val fileName = URLUtil.guessFileName(url, contentDisposition, mimeType)
         request.setTitle(fileName)
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalPublicDir(
-            Environment.DIRECTORY_DOWNLOADS, "Image/$fileName"
-        )
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Image/$fileName")
+
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadManager.enqueue(request)
     }
@@ -238,30 +272,15 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == multiplePermissionId) {
-            if (grantResults.isNotEmpty()) {
-                var isGrant = true
-                for (element in grantResults) {
-                    if (element == PackageManager.PERMISSION_DENIED) {
-                        isGrant = false
-                    }
-                }
-                if (isGrant) {
-                    Toast.makeText(this, "All permissions granted successfully", Toast.LENGTH_LONG).show()
+            var isGrant = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+            if (isGrant) {
+                Toast.makeText(this, "All permissions granted successfully", Toast.LENGTH_LONG).show()
+            } else {
+                if (permissions.any { !ActivityCompat.shouldShowRequestPermissionRationale(this, it) }) {
+                    appSettingOpen(this)
                 } else {
-                    var someDenied = false
-                    for (permission in permissions) {
-                        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                            if (ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
-                                someDenied = true
-                            }
-                        }
-                    }
-                    if (someDenied) {
-                        appSettingOpen(this)
-                    } else {
-                        warningPermissionDialog(this) { _: DialogInterface, which: Int ->
-                            if (which == DialogInterface.BUTTON_POSITIVE) checkMultiplePermission()
-                        }
+                    warningPermissionDialog(this) { _, which ->
+                        if (which == DialogInterface.BUTTON_POSITIVE) checkMultiplePermission()
                     }
                 }
             }

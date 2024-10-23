@@ -1,17 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/home"
         android:icon="@drawable/ic_home"
-        android:title="Home" />
+        android:title="Home"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/favorites"
-        android:icon="@drawable/ic_home"
+        android:icon="@drawable/ic_favorite"
+        android:title="Favorites"
+        app:showAsAction="always" />
 
-        android:title="Favorites" />
     <item
-        android:id="@+id/settings"
-        android:icon="@drawable/ic_home"
+        android:id="@+id/about"
+        android:icon="@drawable/ic_about"
+        android:title="About"
+        app:showAsAction="always" />
 
-        android:title="Settings" />
+    <item
+        android:id="@+id/privacy_policy"
+        android:icon="@drawable/ic_privacy_policy"
+        android:title="Privacy Policy"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/feedback"
+        android:icon="@drawable/ic_feedback"
+        android:title="Feedback"
+        app:showAsAction="always" />
 </menu>
