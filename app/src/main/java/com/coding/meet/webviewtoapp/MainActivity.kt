@@ -33,7 +33,6 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private var webUrl = "https://github.com/SauravKumar1s/"
-//    private var webUrl = "https://sample-videos.com/download-sample-jpg-image.php"
     private val multiplePermissionId = 14
     private val multiplePermissionNameList = if (Build.VERSION.SDK_INT >= 33) {
         arrayListOf()
@@ -46,7 +45,6 @@ class MainActivity : AppCompatActivity() {
 
     private var isLoaded = false
     private var doubleBackToExitPressedOnce = false
-
 
     private val networkConnectivityObserver: NetworkConnectivityObserver by lazy {
         NetworkConnectivityObserver(this)
@@ -63,7 +61,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         loadingDialog.setContentView(R.layout.loading_layout)
         loadingDialog.window!!.setLayout(
             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -78,7 +75,6 @@ class MainActivity : AppCompatActivity() {
         setting.domStorageEnabled = true
         setting.javaScriptCanOpenWindowsAutomatically = true
         setting.supportMultipleWindows()
-
 
         val snackbar = Snackbar.make(
             mainBinding.root,
@@ -96,9 +92,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     mainBinding.swipeRefresh.isEnabled = true
                     if (!isLoaded) loadWebView()
-
                 }
-
                 else -> {
                     showNoInternet()
                     snackbar.show()
@@ -114,7 +108,6 @@ class MainActivity : AppCompatActivity() {
                 setProgressDialogVisibility(false)
             }
         }
-
     }
 
     private fun setProgressDialogVisibility(visible: Boolean) {
@@ -129,25 +122,18 @@ class MainActivity : AppCompatActivity() {
     private fun showNoInternet() {
         isLoaded = false
         setProgressDialogVisibility(false)
-        gone(mainBinding.webView)
-        visible(mainBinding.noInternet.noInternetRL)
+        mainBinding.webView.visibility = android.view.View.GONE
+        mainBinding.noInternet.noInternetRL.visibility = android.view.View.VISIBLE
     }
 
     private fun loadWebView() {
-        gone(mainBinding.noInternet.noInternetRL)
-        visible(mainBinding.webView)
+        mainBinding.noInternet.noInternetRL.visibility = android.view.View.GONE
+        mainBinding.webView.visibility = android.view.View.VISIBLE
         mainBinding.webView.loadUrl(webUrl)
         mainBinding.webView.setDownloadListener { url, userAgent, contentDisposition, mimeType, contentLength ->
-
-            Log.d("Url", url.trim())
-            Log.d("userAgent", userAgent)
-            Log.d("contentDisposition", contentDisposition)
-            Log.d("mimeType", mimeType)
-            Log.d("contentLength", contentLength.toString())
             if (checkMultiplePermission()) {
-                download(url.trim(),userAgent,contentDisposition,mimeType,contentLength)
+                download(url.trim(), userAgent, contentDisposition, mimeType, contentLength)
             }
-
         }
         mainBinding.webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -156,8 +142,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun shouldOverrideUrlLoading(
-                view: WebView?,
-                request: WebResourceRequest?,
+                view: WebView?, request: WebResourceRequest?
             ): Boolean {
                 val url = request?.url.toString()
                 view?.loadUrl(url)
@@ -172,15 +157,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onReceivedError(
-                view: WebView?,
-                request: WebResourceRequest?,
-                error: WebResourceError?,
+                view: WebView?, request: WebResourceRequest?, error: WebResourceError?
             ) {
                 isLoaded = false
                 setProgressDialogVisibility(false)
                 super.onReceivedError(view, request, error)
             }
-
         }
     }
 
@@ -195,95 +177,66 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         }
-
         return super.onKeyDown(keyCode, event)
     }
 
     private fun showToastExit() {
-        when {
-            doubleBackToExitPressedOnce -> {
-                finish()
-            }
-
-            else -> {
-                doubleBackToExitPressedOnce = true
-                Toast.makeText(this, "Please Click Back Again to Exit", Toast.LENGTH_LONG).show()
-                Handler(Looper.getMainLooper()).postDelayed(
-                    {
-                        doubleBackToExitPressedOnce = false
-                    }, 2000
-                )
-            }
+        if (doubleBackToExitPressedOnce) {
+            finish()
+        } else {
+            doubleBackToExitPressedOnce = true
+            Toast.makeText(this, "Please click back again to exit", Toast.LENGTH_LONG).show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                doubleBackToExitPressedOnce = false
+            }, 2000)
         }
     }
 
     private fun download(
-        url: String,
-        userAgent: String,
-        contentDisposition: String,
-        mimeType: String,
-        contentLength: Long
+        url: String, userAgent: String, contentDisposition: String, mimeType: String, contentLength: Long
     ) {
-        val folder = File(
-            Environment.getExternalStorageDirectory().toString() + "/Download/Image"
-        )
+        val folder = File(Environment.getExternalStorageDirectory().toString() + "/Download/Image")
         if (!folder.exists()) {
             folder.mkdirs()
         }
         Toast.makeText(this, "Download Started", Toast.LENGTH_SHORT).show()
 
-
         val request = DownloadManager.Request(Uri.parse(url))
         request.setMimeType(mimeType)
         val cookie = CookieManager.getInstance().getCookie(url)
-        request.addRequestHeader("cookie",cookie)
-        request.addRequestHeader("User-Agent",userAgent)
+        request.addRequestHeader("cookie", cookie)
+        request.addRequestHeader("User-Agent", userAgent)
         request.setAllowedNetworkTypes(
-            DownloadManager.Request.NETWORK_WIFI or
-                    DownloadManager.Request.NETWORK_MOBILE
+            DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE
         )
         val fileName = URLUtil.guessFileName(url, contentDisposition, mimeType)
         request.setTitle(fileName)
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         request.setDestinationInExternalPublicDir(
-            Environment.DIRECTORY_DOWNLOADS,
-            "Image/$fileName"
+            Environment.DIRECTORY_DOWNLOADS, "Image/$fileName"
         )
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadManager.enqueue(request)
-
     }
-
 
     private fun checkMultiplePermission(): Boolean {
         val listPermissionNeeded = arrayListOf<String>()
         for (permission in multiplePermissionNameList) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 listPermissionNeeded.add(permission)
             }
         }
         if (listPermissionNeeded.isNotEmpty()) {
-            ActivityCompat.requestPermissions(
-                this,
-                listPermissionNeeded.toTypedArray(),
-                multiplePermissionId
-            )
+            ActivityCompat.requestPermissions(this, listPermissionNeeded.toTypedArray(), multiplePermissionId)
             return false
         }
         return true
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
         if (requestCode == multiplePermissionId) {
             if (grantResults.isNotEmpty()) {
                 var isGrant = true
@@ -293,36 +246,21 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 if (isGrant) {
-                    // here all permission granted successfully
-                    Toast.makeText(this,"all permission granted successfully",Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "All permissions granted successfully", Toast.LENGTH_LONG).show()
                 } else {
                     var someDenied = false
                     for (permission in permissions) {
-                        if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                                this,
-                                permission
-                            )
-                        ) {
-                            if (ActivityCompat.checkSelfPermission(
-                                    this,
-                                    permission
-                                ) == PackageManager.PERMISSION_DENIED
-                            ) {
+                        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                            if (ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
                                 someDenied = true
                             }
                         }
                     }
                     if (someDenied) {
-                        // here app Setting open because all permission is not granted
-                        // and permanent denied
                         appSettingOpen(this)
                     } else {
-                        // here warning permission show
                         warningPermissionDialog(this) { _: DialogInterface, which: Int ->
-                            when (which) {
-                                DialogInterface.BUTTON_POSITIVE ->
-                                    checkMultiplePermission()
-                            }
+                            if (which == DialogInterface.BUTTON_POSITIVE) checkMultiplePermission()
                         }
                     }
                 }
