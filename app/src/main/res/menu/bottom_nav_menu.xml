@@ -14,20 +14,22 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/about"
-        android:icon="@drawable/ic_about"
-        android:title="About"
+        android:id="@+id/search"
+        android:icon="@drawable/ic_search"
+        android:title="Search"
         app:showAsAction="always" />
 
-    <item
-        android:id="@+id/privacy_policy"
-        android:icon="@drawable/ic_privacy_policy"
-        android:title="Privacy Policy"
-        app:showAsAction="always" />
+
 
     <item
         android:id="@+id/feedback"
         android:icon="@drawable/ic_feedback"
         android:title="Feedback"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/donate"
+        android:icon="@drawable/donate"
+        android:title="Donate"
         app:showAsAction="always" />
 </menu>

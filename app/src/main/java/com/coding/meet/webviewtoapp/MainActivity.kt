@@ -126,12 +126,14 @@ class MainActivity : AppCompatActivity() {
                     mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/favorites.html")
                     true
                 }
-                R.id.about -> {
-                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/about.html")
+
+                R.id.search -> {
+                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/search.html")
                     true
                 }
-                R.id.privacy_policy -> {
-                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/privacy_policy.html")
+
+                R.id.donate -> {
+                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/payment.html")
                     true
                 }
                 R.id.feedback -> {
