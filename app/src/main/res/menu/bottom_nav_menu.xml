@@ -19,8 +19,6 @@
         android:title="Search"
         app:showAsAction="always" />
 
-
-
     <item
         android:id="@+id/feedback"
         android:icon="@drawable/ic_feedback"

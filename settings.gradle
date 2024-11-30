@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "WebView To App"
+rootProject.name = "All In Matka"
 include ':app'
