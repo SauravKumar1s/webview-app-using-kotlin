@@ -1,5 +1,4 @@
 package com.coding.meet.webviewtoapp
-
 import android.app.Dialog
 import android.app.DownloadManager
 import android.content.DialogInterface
@@ -29,13 +28,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.coding.meet.webviewtoapp.databinding.ActivityMainBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
 
+
 class MainActivity : AppCompatActivity() {
 
-    private var webUrl = "https://web-view-sable.vercel.app/"
+    private var webUrl = "https://fitmatka.online"
     private val multiplePermissionId = 14
     private val multiplePermissionNameList = if (Build.VERSION.SDK_INT >= 33) {
         arrayListOf()
@@ -114,38 +113,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Bottom navigation setup
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNavigationView.setOnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.home -> {
-                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/")
-                    true
-                }
-                R.id.favorites -> {
-                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/favorites.html")
-                    true
-                }
-
-                R.id.search -> {
-                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/search.html")
-                    true
-                }
-
-                R.id.donate -> {
-                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/payment.html")
-                    true
-                }
-                R.id.feedback -> {
-                    mainBinding.webView.loadUrl("https://web-view-sable.vercel.app/feedback.html")
-                    true
-                }
-                else -> false
-            }
-        }
-
         if (!isLoaded) {
-            bottomNavigationView.selectedItemId = R.id.home
+            loadWebView()
         }
     }
 
