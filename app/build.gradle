@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace 'com.coding.meet.webviewtoapp'
-    compileSdk 35 // Updated to API level 35
+    namespace 'com.coding.meet.allinmatka'
+    compileSdk 36 // Updated to API level 35
  
     defaultConfig {
         applicationId "com.coding.meet.allinmatka"
         minSdk 21
-        targetSdk 35 // Here need to Change The Target sdk
-        versionCode 7 // INCREMENTED VERSION CODE
-        versionName "1.0.6" // Optional, for display purposes
+        targetSdk 36 // Here need to Change The Target sdk
+        versionCode 11 // INCREMENTED VERSION CODE
+        versionName "1.0.7" // Optional, for display purposes
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
